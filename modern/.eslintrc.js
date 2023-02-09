@@ -16,6 +16,7 @@ module.exports = {
     'no-nested-ternary': [0],
     'operator-linebreak': [0],
     'import/no-unresolved': [0],
+    'linebreak-style': ['error', process.env.NODE_ENV === 'prod' ? 'unix' : 'windows'],
     'object-curly-newline': [1, {
       ObjectExpression: { minProperties: 8, multiline: true, consistent: true },
       ObjectPattern: { minProperties: 8, multiline: true, consistent: true },
