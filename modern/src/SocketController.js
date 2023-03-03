@@ -68,7 +68,6 @@ const SocketController = () => {
       }
       if (data.positions) {
         dispatch(sessionActions.updatePositions(data.positions));
-        console.log('NEW MESSAGE', data);
       }
       if (data.events) {
         if (!features.disableEvents) {

@@ -148,7 +148,7 @@ const MainPage = () => {
       </div>
       <EventsDrawer open={eventsOpen} onClose={() => setEventsOpen(false)} />
       {selectedDeviceId && (
-        !isCopetran ?
+        isCopetran ?
           (
             <StatusCard
               deviceId={selectedDeviceId}

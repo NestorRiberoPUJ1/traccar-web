@@ -15,6 +15,8 @@ import {
   MenuItem,
   CardMedia,
   Snackbar,
+  Stack,
+  CircularProgress,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import CloseIcon from '@mui/icons-material/Close';
@@ -24,7 +26,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PendingIcon from '@mui/icons-material/Pending';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import RouteIcon from '@mui/icons-material/Route';
 
+import moment from 'moment';
 import { useTranslation } from './LocalizationProvider';
 import RemoveDialog from './RemoveDialog';
 import PositionValue from './PositionValue';
@@ -34,6 +38,7 @@ import { devicesActions } from '../../store';
 import { useCatch, useCatchCallback } from '../../reactHelper';
 import { useAttributePreference } from '../util/preferences';
 import useFormatToText from '../util/useFormatToText';
+import DirectionsSearch from './DirectionsSearch';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -99,7 +104,6 @@ const useStyles = makeStyles((theme) => ({
 
 const StatusRow = ({ name, content }) => {
   const classes = useStyles();
-  console.log(name);
   return (
     <TableRow>
       <TableCell className={classes.cell}>
@@ -134,6 +138,8 @@ const CopeStatusCard = ({ deviceId, position, onClose, disableActions, desktopPa
   const [removing, setRemoving] = useState(false);
 
   const [copied, setCopied] = useState(false);
+
+  const [loadingQuickTrack, setLoadingQuickTrack] = useState(false);
 
   const handleRemove = useCatch(async (removed) => {
     if (removed) {
@@ -190,8 +196,24 @@ const CopeStatusCard = ({ deviceId, position, onClose, disableActions, desktopPa
     if (reason === 'clickaway') {
       return;
     }
-
     setCopied(false);
+  };
+
+  const handleQuickTrack = () => {
+    setLoadingQuickTrack(true);
+    const selectedFrom = moment().startOf('day').toISOString();
+    const selectedTo = moment().endOf('day').toISOString();
+    const query = new URLSearchParams({ deviceId, from: selectedFrom, to: selectedTo });
+    fetch(`/api/positions?${query.toString()}`)
+      .then((response) => response.json())
+      .then((result) => {
+        setLoadingQuickTrack(false);
+        dispatch(devicesActions.setQuickTrack(result.map((item) => [item.longitude, item.latitude])));
+      })
+      .catch((error) => {
+        setLoadingQuickTrack(false);
+        throw Error(error);
+      });
   };
 
   return (
@@ -228,9 +250,24 @@ const CopeStatusCard = ({ deviceId, position, onClose, disableActions, desktopPa
                 >
                   <ContentCopyIcon fontSize="small" className={classes.mediaButton} />
                 </IconButton>
-                <Typography variant="body2" color="textSecondary">
-                  {device.name}
-                </Typography>
+                <Stack direction="row" alignItems="center" gap={1}>
+                  <Typography variant="body2" color="textSecondary">
+                    {device.name}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={handleQuickTrack}
+                    onTouchStart={handleQuickTrack}
+                    disabled={loadingQuickTrack}
+                  >
+                    {
+                      loadingQuickTrack ?
+                        <CircularProgress size={20} />
+                        :
+                        <RouteIcon fontSize="small" className={classes.mediaButton} />
+                    }
+                  </IconButton>
+                </Stack>
 
                 <IconButton
                   size="small"
@@ -260,6 +297,7 @@ const CopeStatusCard = ({ deviceId, position, onClose, disableActions, desktopPa
                     ))}
                   </TableBody>
                 </Table>
+                <DirectionsSearch />
               </CardContent>
             )}
             <CardActions classes={{ root: classes.actions }} disableSpacing>

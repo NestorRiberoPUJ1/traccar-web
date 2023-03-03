@@ -138,7 +138,7 @@ export const formatIgnition = (value, t) => (value ? t('sharedEngineOn') : t('sh
 export const formatFuel = (value) => `${value.toFixed(2)} Gal`; // New Fuel
 
 export const formatStopTime = (position) => {
-  console.log(position);
+  //  console.log(position);
   const { deviceTime } = position;
   const { stopTime, lastMotion } = position.attributes;
   if (stopTime || lastMotion === 'false') {
