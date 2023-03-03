@@ -16,6 +16,7 @@ import useFilter from './useFilter';
 import MainToolbar from './MainToolbar';
 import MainMap from './MainMap';
 import { useAttributePreference } from '../common/util/preferences';
+import CopeStatusCard from '../common/components/CopeStatusCard';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -73,6 +74,7 @@ const MainPage = () => {
 
   const selectedDeviceId = useSelector((state) => state.devices.selectedId);
   const positions = useSelector((state) => state.session.positions);
+  const isCopetran = useSelector((state) => state.session.user.attributes.copetran);
   const [filteredPositions, setFilteredPositions] = useState([]);
   const selectedPosition = filteredPositions.find((position) => selectedDeviceId && position.deviceId === selectedDeviceId);
 
@@ -146,12 +148,24 @@ const MainPage = () => {
       </div>
       <EventsDrawer open={eventsOpen} onClose={() => setEventsOpen(false)} />
       {selectedDeviceId && (
-        <StatusCard
-          deviceId={selectedDeviceId}
-          position={selectedPosition}
-          onClose={() => dispatch(devicesActions.selectId(null))}
-          desktopPadding={theme.dimensions.drawerWidthDesktop}
-        />
+        !isCopetran ?
+          (
+            <StatusCard
+              deviceId={selectedDeviceId}
+              position={selectedPosition}
+              onClose={() => dispatch(devicesActions.selectId(null))}
+              desktopPadding={theme.dimensions.drawerWidthDesktop}
+            />
+          )
+          :
+          (
+            <CopeStatusCard
+              deviceId={selectedDeviceId}
+              position={selectedPosition}
+              onClose={() => dispatch(devicesActions.selectId(null))}
+              desktopPadding={theme.dimensions.drawerWidthDesktop}
+            />
+          )
       )}
     </div>
   );

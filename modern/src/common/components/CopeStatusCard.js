@@ -14,6 +14,7 @@ import {
   Menu,
   MenuItem,
   CardMedia,
+  Snackbar,
 } from '@mui/material';
 import makeStyles from '@mui/styles/makeStyles';
 import CloseIcon from '@mui/icons-material/Close';
@@ -22,6 +23,7 @@ import PublishIcon from '@mui/icons-material/Publish';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import PendingIcon from '@mui/icons-material/Pending';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 import { useTranslation } from './LocalizationProvider';
 import RemoveDialog from './RemoveDialog';
@@ -31,6 +33,7 @@ import usePositionAttributes from '../attributes/usePositionAttributes';
 import { devicesActions } from '../../store';
 import { useCatch, useCatchCallback } from '../../reactHelper';
 import { useAttributePreference } from '../util/preferences';
+import useFormatToText from '../util/useFormatToText';
 
 const useStyles = makeStyles((theme) => ({
   card: {
@@ -96,11 +99,11 @@ const useStyles = makeStyles((theme) => ({
 
 const StatusRow = ({ name, content }) => {
   const classes = useStyles();
-
+  console.log(name);
   return (
     <TableRow>
       <TableCell className={classes.cell}>
-        <Typography variant="body2">{name}</Typography>
+        <Typography variant="body2" style={{ userSelect: 'none' }}>{name}</Typography>
       </TableCell>
       <TableCell className={classes.cell}>
         <Typography variant="body2" color="textSecondary">{content}</Typography>
@@ -109,11 +112,13 @@ const StatusRow = ({ name, content }) => {
   );
 };
 
-const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPadding = 0 }) => {
+const CopeStatusCard = ({ deviceId, position, onClose, disableActions, desktopPadding = 0 }) => {
   const classes = useStyles({ desktopPadding });
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const t = useTranslation();
+
+  const { formatData } = useFormatToText();
 
   const deviceReadonly = useDeviceReadonly();
 
@@ -122,11 +127,13 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
   const deviceImage = device?.attributes?.deviceImage;
 
   const positionAttributes = usePositionAttributes(t);
-  const positionItems = useAttributePreference('positionItems', 'speed,address,totalDistance,course');
+  const positionItems = useAttributePreference('positionItems', 'deviceTime,speed,address,totalDistance,course');
 
   const [anchorEl, setAnchorEl] = useState(null);
 
   const [removing, setRemoving] = useState(false);
+
+  const [copied, setCopied] = useState(false);
 
   const handleRemove = useCatch(async (removed) => {
     if (removed) {
@@ -166,6 +173,27 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
     }
   }, [navigate, position]);
 
+  const handleCopyToClipboard = () => {
+    const attrs = positionItems.split(',').filter((key) => position.hasOwnProperty(key) || position.attributes.hasOwnProperty(key));
+    const text = attrs.reduce((acc, key) => {
+      let value = acc;
+      if (position.hasOwnProperty(key) || position.attributes.hasOwnProperty(key)) {
+        value += `${formatData(position, key)};`;
+      }
+      return (value);
+    }, `${device.name};`);
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+  };
+
+  const handleCloseSnack = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+
+    setCopied(false);
+  };
+
   return (
     <>
       <div className={classes.root}>
@@ -178,6 +206,13 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
               >
                 <IconButton
                   size="small"
+                  onClick={handleCopyToClipboard}
+                  onTouchStart={handleCopyToClipboard}
+                >
+                  <ContentCopyIcon fontSize="small" className={classes.mediaButton} />
+                </IconButton>
+                <IconButton
+                  size="small"
                   onClick={onClose}
                   onTouchStart={onClose}
                 >
@@ -186,9 +221,17 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
               </CardMedia>
             ) : (
               <div className={classes.header}>
+                <IconButton
+                  size="small"
+                  onClick={handleCopyToClipboard}
+                  onTouchStart={handleCopyToClipboard}
+                >
+                  <ContentCopyIcon fontSize="small" className={classes.mediaButton} />
+                </IconButton>
                 <Typography variant="body2" color="textSecondary">
                   {device.name}
                 </Typography>
+
                 <IconButton
                   size="small"
                   onClick={onClose}
@@ -271,8 +314,16 @@ const StatusCard = ({ deviceId, position, onClose, disableActions, desktopPaddin
         itemId={deviceId}
         onResult={(removed) => handleRemove(removed)}
       />
+      <Snackbar
+        open={copied}
+        autoHideDuration={2000}
+        onClose={handleCloseSnack}
+        message="Copied to Clipboard"
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      />
+
     </>
   );
 };
 
-export default StatusCard;
+export default CopeStatusCard;

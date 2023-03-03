@@ -295,6 +295,8 @@
     "positionImage": "Image",
     "positionVideo": "Video",
     "positionAudio": "Audio",
+    "positionLastMotion": "Last Motion",
+    "positionStopTime": "Parking Time",
     "serverTitle": "Server Settings",
     "serverZoom": "Zoom",
     "serverRegistration": "Registration",

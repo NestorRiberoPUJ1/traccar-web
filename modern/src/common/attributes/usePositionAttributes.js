@@ -352,4 +352,12 @@ export default (t) => useMemo(() => ({
     name: t('positionAudio'),
     type: 'string',
   },
+  lastMotion: {
+    name: t('positionLastMotion'),
+    type: 'string',
+  },
+  stopTime: {
+    name: t('positionStopTime'),
+    type: 'string',
+  },
 }), [t]);

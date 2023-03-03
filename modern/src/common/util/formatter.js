@@ -38,7 +38,8 @@ export const formatStatus = (value, t) => t(prefixString('deviceStatus', value))
 export const formatAlarm = (value, t) => (value ? t(prefixString('alarm', value)) : '');
 
 export const formatCourse = (value) => {
-  const courseValues = ['\u2191', '\u2197', '\u2192', '\u2198', '\u2193', '\u2199', '\u2190', '\u2196'];
+  //  const courseValues = ['\u2191', '\u2197', '\u2192', '\u2198', '\u2193', '\u2199', '\u2190', '\u2196']; //Arrows
+  const courseValues = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
   let normalizedValue = (value + 45 / 2) % 360;
   if (normalizedValue < 0) {
     normalizedValue += 360;
@@ -130,4 +131,21 @@ export const formatNotificationTitle = (t, notification, includeId) => {
     title += ` [${notification.id}]`;
   }
   return title;
+};
+
+export const formatIgnition = (value, t) => (value ? t('sharedEngineOn') : t('sharedEngineOff')); // New Ignition
+
+export const formatFuel = (value) => `${value.toFixed(2)} Gal`; // New Fuel
+
+export const formatStopTime = (position) => {
+  console.log(position);
+  const { deviceTime } = position;
+  const { stopTime, lastMotion } = position.attributes;
+  if (stopTime || lastMotion === 'false') {
+    return 'N/A';
+  }
+  const current = new Date(deviceTime);
+  const last = new Date(lastMotion);
+  const deltaTime = current - last;
+  return moment.duration(deltaTime).humanize();
 };
