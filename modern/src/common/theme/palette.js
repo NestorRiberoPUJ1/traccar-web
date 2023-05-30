@@ -1,12 +1,13 @@
 import {
-  amber, grey, green, indigo, red, common,
+  amber, grey, green, red, common,
 } from '@mui/material/colors';
 
 const colors = {
   white: common.white,
   background: grey[50],
-  primary: indigo[900],
-  secondary: green[500],
+  primary: '#00B1FE',
+  primaryContrastText: '#ffffff',
+  secondary: '#536173',
   positive: green[500],
   medium: amber[700],
   negative: red[500],
@@ -20,6 +21,7 @@ export default {
   },
   primary: {
     main: colors.primary,
+    contrastText: colors.primaryContrastText,
   },
   secondary: {
     main: colors.secondary,

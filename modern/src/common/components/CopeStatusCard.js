@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Card,
   CardContent,
@@ -298,6 +298,7 @@ const CopeStatusCard = ({ deviceId, position, onClose, disableActions, desktopPa
                   </TableBody>
                 </Table>
                 <DirectionsSearch />
+                <Link to="/">Find a route</Link>
               </CardContent>
             )}
             <CardActions classes={{ root: classes.actions }} disableSpacing>
